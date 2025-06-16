@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>청춘복권 관리자 대시보드</title>
+  <style>
+    select, input {
+      padding: 8px;
+      width: 100%;
+      margin: 8px 0 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 14px;
+      color: #333;
+    }
+    select {
+      appearance: none;
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg fill='gray' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px 16px;
+    }
+    body {
+      font-family: 'Pretendard', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background-color: #f4f6fc;
+    }
+    h1 {
+      text-align: center;
+      color: #d94f70;
+    }
+    .section {
+      max-width: 800px;
+      background: #fff;
+      padding: 24px;
+      margin: 20px auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    label {
+      font-weight: 600;
+    }
+    button {
+      background-color: #d94f70;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #be3a5a;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .lotto-set {
+      margin-bottom: 20px;
+    }
+    .number-inputs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 청춘복권 조회</h1>
+
+  <div class="section">
+    <h2>1. 전체 번호 통계</h2>
+    <p id="totalCount" style="font-size: 0.9rem; color: #555; margin-bottom: 8px;"></p>
+    <button onclick="loadStats()">통계 새로고침</button>
+    <table>
+      <thead>
+        <tr><th>번호</th><th>발급 횟수</th></tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>2. 복권 번호 입력</h2>
+    <button onclick="addLottoSet()">+ 복권 번호 추가</button>
+
+    <div id="lottoContainer"></div>
+
+    <label>학과 선택</label>
+     <select id="department" required>
+    <option value="">-- 학과를 선택하세요 --</option>
+    <option>AI소프트웨어학과</option>
+    <option>IT경영학과</option>
+    <option>간호학과</option>
+    <option>건설시스템안전공학과</option>
+    <option>건축사회환경공학부</option>
+    <option>건축학부</option>
+    <option>경영학과</option>
+    <option>국어국문학과</option>
+    <option>국제경제통상학과</option>
+    <option>국제관계학과</option>
+    <option>국제레저관광학과</option>
+    <option>글로벌경영학과</option>
+    <option>글로벌경제학과</option>
+    <option>글로벌관광학과</option>
+    <option>글로벌관광학부</option>
+    <option>글로벌소프트웨어학과</option>
+    <option>글로벌인재학부</option>
+    <option>글로벌자유전공학부</option>
+    <option>글로벌한국어교육학과</option>
+    <option>글로벌한국학과</option>
+    <option>기계ICT융합공학부</option>
+    <option>기계공학과</option>
+    <option>디스플레이반도체공학과</option>
+    <option>디자인학부</option>
+    <option>디지털콘텐츠학부</option>
+    <option>무도경호학과</option>
+    <option>무도경호학부</option>
+    <option>무도학부</option>
+    <option>물리치료학과</option>
+    <option>미디어커뮤니케이션학과</option>
+    <option>미디어커뮤니케이션학부</option>
+    <option>미래자동차공학부</option>
+    <option>반도체소재공학과</option>
+    <option>법·경찰학과</option>
+    <option>사학과</option>
+    <option>사회복지학과</option>
+    <option>산업경영공학과</option>
+    <option>산업안전경영공학과</option>
+    <option>상담·산업심리학과</option>
+    <option>상담산업심리학과</option>
+    <option>상담심리사회복지학과</option>
+    <option>상담심리학과</option>
+    <option>소방방재안전학과</option>
+    <option>수산생명의학과</option>
+    <option>스마트자동차공학부</option>
+    <option>스마트정보통신공학과</option>
+    <option>스포츠과학과</option>
+    <option>스포츠과학부</option>
+    <option>시각디자인학과</option>
+    <option>식품공학·영양학부</option>
+    <option>식품과학부</option>
+    <option>신소재공학과</option>
+    <option>신학과</option>
+    <option>신학순결학과</option>
+    <option>에너지화학공학과</option>
+    <option>역사·영상콘텐츠학부</option>
+    <option>역사문화콘텐츠학과</option>
+    <option>역사문화콘텐츠학부</option>
+    <option>영상예술학과</option>
+    <option>영화영상학과</option>
+    <option>외국어자율전공학부</option>
+    <option>외국어학부</option>
+    <option>응급구조학과</option>
+    <option>일어일본학과</option>
+    <option>자유전공학부</option>
+    <option>전자공학과</option>
+    <option>정보통신공학과</option>
+    <option>정치·국제학과</option>
+    <option>제약생명공학과</option>
+    <option>제약화장품학과</option>
+    <option>치위생학과</option>
+    <option>컴퓨터공학부</option>
+    <option>한국문학콘텐츠창작학과</option>
+    <option>항공관광학부</option>
+    <option>행정·공기업학과</option>
+    <option>행정학과</option>
+    <option>행정학과(야)</option>
+    <option>환경생명화학공학과</option>
+    <option>기타</option>
+  </select>
+
+    <label>학번 입력</label>
+    <input type="text" id="studentId" maxlength="10" placeholder="예: 2020123456">
+    <label>이름 입력</label>
+    <input type="text" id="name" maxlength="20" placeholder="예: 홍길동">
+
+    <div>
+      <button onclick="issueNumber()">발급하기</button>
+    </div>
+  </div>
+
+  <script>
+    let lottoCount = 0;
+    const maxLottoCount = 2;
+
+    function addLottoSet() {
+      if (lottoCount >= maxLottoCount) {
+        alert("복권 번호는 최대 2개까지만 발급할 수 있습니다.");
+        return;
+      }
+
+      const container = document.getElementById('lottoContainer');
+      const div = document.createElement('div');
+      div.className = 'lotto-set';
+      div.innerHTML = `
+        <label>복권 번호 세트 ${lottoCount + 1}</label>
+        <div class="number-inputs" id="set${lottoCount}">
+          ${[0, 1, 2, 3, 4].map(i =>
+            `<input type="text" maxlength="1" oninput="validateSet(${lottoCount})" />`
+          ).join('')}
+        </div>
+        <p id="matchResult${lottoCount}" style="font-weight:bold;"></p>
+      `;
+      container.appendChild(div);
+      lottoCount++;
+    }
+
+    function validateSet(index) {
+      const inputs = document.querySelectorAll(`#set${index} input`);
+      const values = Array.from(inputs).map(input => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        return input.value;
+      });
+
+      const duplicates = values.filter((v, i, arr) => v && arr.indexOf(v) !== i);
+      inputs.forEach(input => {
+        input.style.borderColor = duplicates.includes(input.value) ? 'red' : '#ccc';
+      });
+
+      const allValid = values.length === 5 && values.every(v => /^[0-9]$/.test(v)) && new Set(values).size === 5;
+      if (!allValid) {
+        document.getElementById(`matchResult${index}`).textContent = '';
+        return;
+      }
+
+      fetch('/api/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numbers: values })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById(`matchResult${index}`).textContent = `같은 번호 보유 인원: ${data.count}명`;
+      });
+    }
+
+    function issueNumber() {
+      const sets = [];
+      for (let i = 0; i < lottoCount; i++) {
+        const inputs = document.querySelectorAll(`#set${i} input`);
+        const values = Array.from(inputs).map(input => input.value.trim());
+        const allValid = values.length === 5 && values.every(v => /^[0-9]$/.test(v)) && new Set(values).size === 5;
+        if (allValid) sets.push(values);
+      }
+
+      const department = document.getElementById('department').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      const name = document.getElementById('name').value.trim();
+
+      if (!department || !studentId || !name) {
+        alert('학과, 학번, 이름을 모두 입력해주세요.');
+        return;
+      }
+
+      if (sets.length === 0) {
+        alert('적어도 하나의 복권 번호 세트를 올바르게 입력해야 합니다.');
+        return;
+      }
+
+      fetch('/api/issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numbers: sets, department, studentId, name })
+      })
+      .then(async res => {
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || '오류 발생');
+        }
+        return res.json();
+      })
+      .then(data => {
+        alert('복권이 성공적으로 발급되었습니다!');
+        loadStats();
+      })
+      .catch(err => {
+        alert(`오류: ${err.message}`);
+        console.error(err);
+      });
+    }
+
+    async function loadStats() {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      const tbody = document.getElementById('statsBody');
+      tbody.innerHTML = '';
+      let total = 0;
+      data.stats.forEach(([combo, count]) => {
+        if (combo.includes(' ')) {
+          const formatted = combo.split(' ').join(' - ');
+          tbody.innerHTML += `<tr><td>${formatted}</td><td>${count}</td></tr>`;
+          total += count;
+        }
+      });
+      document.getElementById('totalCount').textContent = `현재까지 발급된 청춘복권 수: ${total}건`;
+    }
+
+    // 초기 복권 한 세트 렌더링
+    window.onload = () => {
+      addLottoSet();
+    }
+  </script>
+</body>
+</html>

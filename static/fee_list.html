@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>학생회비 납부자 목록</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      padding: 30px;
+      background: #fff0f5;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #ffe4e1;
+    }
+    .add-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      background-color: #d94f70;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(to bottom, #fff0f5, #ffe4e1);
+      border: 2px solid #d94f70;
+      border-radius: 12px;
+      padding: 24px;
+      width: 90%;
+      max-width: 350px;
+      z-index: 10;
+      box-shadow: 0 12px 30px rgba(217, 79, 112, 0.25);
+    }
+    #popup h3 {
+      margin-top: 0;
+      color: #d94f70;
+      text-align: center;
+    }
+    #popup input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    #popup button {
+      width: 100%;
+      padding: 10px;
+      background: #d94f70;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 학생회비 납부자 목록</h2>
+  <button class="add-btn" onclick="showPopup()">➕ 납부자 추가</button>
+  <input type="text" id="search" placeholder="학번, 이름 또는 학과 입력" />
+  <table>
+    <thead><tr><th>학번</th><th>이름</th><th>학과</th><th>입장팔찌</th><th>돗자리대여</th></tr></thead>
+    <tbody id="feeTableBody"></tbody>
+  </table>
+
+  <div id="popup">
+    <button onclick="hidePopup()">×</button>
+    <h3>납부자 등록</h3>
+    <input type="text" id="inputId" placeholder="학번 (10자리)" maxlength="10" />
+    <input type="text" id="inputName" placeholder="이름" />
+    <input type="text" id="inputDept" placeholder="학과" />
+    <button onclick="addFee()">등록</button>
+    <p id="formMessage" style="color: red; text-align: center;"></p>
+  </div>
+
+<script>
+  function renderTable(data) {
+    const tbody = document.getElementById('feeTableBody');
+    const rows = data.map(entry =>
+      `<tr>
+        <td>${entry.studentId}</td>
+        <td>${entry.name}</td>
+        <td>${entry.department}</td>
+        <td><input type="checkbox" ${entry.check_idcard ? 'checked' : ''} onchange="updateCheckbox('${entry.studentId}', 'check_idcard', this.checked)"></td>
+        <td><input type="checkbox" ${entry.check_identity ? 'checked' : ''} onchange="updateCheckbox('${entry.studentId}', 'check_identity', this.checked)"></td>
+      </tr>`
+    );
+    tbody.innerHTML = rows.join('');
+  }
+
+  async function updateCheckbox(studentId, field, value) {
+    await fetch('/api/fee-check', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId, field, value })
+    });
+  }
+
+  document.getElementById('search').addEventListener('input', async function () {
+    const keyword = this.value.trim();
+    const res = await fetch(`/api/fee-search?q=${encodeURIComponent(keyword)}`);
+    const data = await res.json();
+    renderTable(data.entries);
+  });
+
+  async function addFee() {
+    const studentId = document.getElementById('inputId').value.trim();
+    const name = document.getElementById('inputName').value.trim();
+    const department = document.getElementById('inputDept').value.trim();
+    const msg = document.getElementById('formMessage');
+
+    if (!studentId || studentId.length !== 10 || isNaN(studentId)) {
+      msg.style.color = "red";
+      msg.innerText = "학번은 숫자 10자리여야 합니다.";
+      return;
+    }
+
+    if (!name || !department) {
+      msg.style.color = "red";
+      msg.innerText = "이름과 학과를 모두 입력해주세요.";
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/fee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, name, department })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        msg.style.color = "green";
+        msg.innerText = "등록 완료!";
+        document.getElementById('inputId').value = '';
+        document.getElementById('inputName').value = '';
+        document.getElementById('inputDept').value = '';
+        setTimeout(() => {
+          document.getElementById("popup").style.display = "none";
+          document.getElementById('formMessage').innerText = '';
+          document.getElementById('search').dispatchEvent(new Event('input'));
+        }, 1000);
+      } else {
+        msg.style.color = "red";
+        msg.innerText = result.detail || "등록 실패";
+      }
+    } catch (err) {
+      msg.innerText = "에러 발생";
+    }
+  }
+
+  function showPopup() {
+    document.getElementById("popup").style.display = "block";
+  }
+
+  function hidePopup() {
+    document.getElementById("popup").style.display = "none";
+  }
+
+  window.onload = () => {
+    document.getElementById('search').dispatchEvent(new Event('input'));
+  };
+</script>
+
+</body>
+</html>
