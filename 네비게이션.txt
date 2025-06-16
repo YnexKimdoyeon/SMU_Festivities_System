@@ -1,0 +1,11 @@
+http://ynexdoyeonkim.kro.kr/admin -> 복권발급페이지
+http://ynexdoyeonkim.kro.kr/winner -> 복권 당첨자 페이지
+
+http://ynexdoyeonkim.kro.kr/register -> 학과랭킹 추가 페이지
+http://ynexdoyeonkim.kro.kr/student-list -> 학과랭킹 추가 페이지
+
+http://ynexdoyeonkim.kro.kr/extra-list -> 돗자리 리스트 페이지
+http://ynexdoyeonkim.kro.kr/extra-register -> 돗자리 신청 페이지
+
+http://ynexdoyeonkim.kro.kr/fee-list -> 학생회비 납부 페이지
+uvicorn main:app --host 0.0.0.0 --port 80

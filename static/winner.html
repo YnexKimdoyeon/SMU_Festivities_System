@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎉 청춘복권 당첨자 발표</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: #fff0f5;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 20px;
+    }
+
+    h1 {
+      color: #d94f70;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .number-box {
+      display: flex;
+      gap: 12px;
+      margin: 30px 0;
+    }
+
+    .ball {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #aaa;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s;
+    }
+
+    .revealed {
+      background-color: #fbc400;
+    }
+
+    button {
+      background-color: #d94f70;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #be3a5a;
+    }
+
+    .winner-list {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 600px;
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #f9dfe6;
+      color: #333;
+      font-weight: bold;
+    }
+
+    td {
+      color: #555;
+    }
+
+    @media (max-width: 500px) {
+      .ball { width: 40px; height: 40px; font-size: 1rem; }
+      th, td { font-size: 0.85rem; padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ 제1회 청춘복권 당첨자</h1>
+
+  <div class="number-box" id="numberBox">
+    <div class="ball">?</div>
+    <div class="ball">?</div>
+    <div class="ball">?</div>
+    <div class="ball">?</div>
+    <div class="ball">?</div>
+  </div>
+
+  <button onclick="revealNext()">번호 보기</button>
+
+  <div class="winner-list" id="winnerList">
+    <h3 style="color:#d94f70;">🏆 당첨자 명단</h3>
+    <table>
+      <thead>
+        <tr><th>이름</th><th>학과</th><th>학번</th></tr>
+      </thead>
+      <tbody id="winnerTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let currentIndex = 0;
+    let numbers = [];
+    let winners = [];
+
+    async function loadWinner() {
+      const res = await fetch('/api/winner');
+      const data = await res.json();
+      numbers = data.numbers;
+      winners = data.winners;
+    }
+
+    function revealNext() {
+      const balls = document.querySelectorAll('.ball');
+      if (currentIndex < numbers.length) {
+        balls[currentIndex].textContent = numbers[currentIndex];
+        balls[currentIndex].classList.add('revealed');
+        currentIndex++;
+        if (currentIndex === numbers.length) {
+          showWinnerTable();
+        }
+      } else {
+        alert("모든 번호가 공개되었습니다!");
+      }
+    }
+
+    function showWinnerTable() {
+      const tableBody = document.getElementById("winnerTableBody");
+      const winnerList = document.getElementById("winnerList");
+
+      tableBody.innerHTML = "";
+      winners.forEach(winner => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${winner.name}</td>
+          <td>${winner.department}</td>
+          <td>${winner.studentId}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      winnerList.style.display = 'block';
+    }
+
+    window.onload = loadWinner;
+  </script>
+</body>
+</html>

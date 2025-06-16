@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>청춘복권 학과 참여율 랭킹</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f9fafc;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #d94f70;
+      font-size: 1.5em;
+      margin-bottom: 30px;
+    }
+    .ranking-box {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      max-width: 100%;
+      margin: 0 auto 30px;
+    }
+    .ranking-box h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      color: #333;
+      text-align: center;
+    }
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .dept-info {
+      text-align: center;
+      font-size: 15px;
+      color: #444;
+    }
+    .dept-info p {
+      margin: 6px 0;
+    }
+
+    /* 모바일 반응형 스타일 */
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+      h1 {
+        font-size: 1.3em;
+      }
+      .ranking-box h2 {
+        font-size: 1em;
+      }
+      .rank-item {
+        font-size: 13px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 청춘복권 학과 참여율 랭킹</h1>
+
+  <div class="ranking-box">
+    <h2>🔥 TOP 5 참여율 학과</h2>
+    <div id="topRanking"></div>
+  </div>
+
+  <div class="ranking-box">
+    <h2>📊 학과별 참여율 조회</h2>
+    <select id="departmentSelect" onchange="updateDeptInfo()">
+      <option value="">-- 학과를 선택하세요 --</option>
+    </select>
+    <div class="dept-info" id="deptInfo"></div>
+  </div>
+
+  <script>
+    let rankingData = [];
+
+    async function loadRanking() {
+      const res = await fetch('/api/ranking');
+      const data = await res.json();
+      rankingData = data.full;
+
+      const top = data.top5;
+      const topBox = document.getElementById('topRanking');
+      topBox.innerHTML = '';
+      top.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'rank-item';
+        div.innerHTML = `<strong>${index + 1}위: ${item.학과}</strong> <span>${item.참여율}%</span>`;
+        topBox.appendChild(div);
+      });
+
+      const select = document.getElementById('departmentSelect');
+      select.innerHTML = '<option value="">-- 학과를 선택하세요 --</option>';
+      rankingData.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.학과;
+        opt.textContent = item.학과;
+        select.appendChild(opt);
+      });
+    }
+
+    function updateDeptInfo() {
+      const selected = document.getElementById('departmentSelect').value;
+      const target = rankingData.find(d => d.학과 === selected);
+      const infoBox = document.getElementById('deptInfo');
+      if (target) {
+        infoBox.innerHTML = `
+          <p><strong>학과:</strong> ${target.학과}</p>
+          <p><strong>참여자수:</strong> ${target.참여자수}명</p>
+          <p><strong>참여율:</strong> ${target.참여율}%</p>
+        `;
+      } else {
+        infoBox.innerHTML = '';
+      }
+    }
+
+    loadRanking();
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>추가 정보 목록</title>
+  <style>
+    body {
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      background-color: #f4f4f7;
+      padding: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #2e2e2e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #f1f3f5;
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background-color: #f9f9fc;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 등록된 추가 정보 목록</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>학번</th>
+        <th>이름</th>
+        <th>전화번호</th>
+        <th>계좌번호</th>
+        <th>개인정보 동의</th>
+        <th>마케팅 동의</th>
+        <th>돗자리 반환</th>
+      </tr>
+    </thead>
+    <tbody id="extraTableBody"></tbody>
+  </table>
+
+  <script>
+    function updateMatReturn(studentId, value) {
+      fetch("/api/extra-update-return", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, return_mat: value })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("업데이트 성공:", data);
+      })
+      .catch(err => {
+        alert("업데이트 실패");
+      });
+    }
+
+    fetch("/api/extra-list")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("extraTableBody");
+        data.entries.forEach(entry => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${entry.studentId}</td>
+            <td>${entry.name}</td>
+            <td>${entry.phone}</td>
+            <td>${entry.bank_account}</td>
+            <td>${entry.agree_privacy ? "✅" : "❌"}</td>
+            <td>${entry.agree_marketing ? "✅" : "❌"}</td>
+            <td>
+              <input type="checkbox" ${entry.return_mat ? "checked" : ""}
+                     onchange="updateMatReturn('${entry.studentId}', this.checked)">
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+  </script>
+</body>
+</html>

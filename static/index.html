@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMU 대동제</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard&display=swap');
+#privacy-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(to bottom, #fff0f5, #ffe4e1);
+  box-shadow: 0 12px 30px rgba(217, 79, 112, 0.25);
+  border: 2px solid #d94f70;
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  z-index: 9999;
+  font-size: 0.8rem;
+  color: #333;
+  text-align: left;
+}
+
+#privacy-popup h3 {
+  text-align: center;
+  color: #d94f70;
+  margin-top: 0;
+}
+
+#privacy-popup .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #d94f70;
+  cursor: pointer;
+}
+
+#privacy-popup p {
+  margin: 8px 0;
+}
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #ffc0cb, #ffe4e1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: row;
+      gap: 30px;
+      width: 90%;
+      max-width: 700px;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      flex-wrap: wrap;
+      margin-top: -50px;
+    }
+
+    .btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 150px;
+      height: 150px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #d94f70;
+      background: linear-gradient(135deg, #fff0f5, #ffe4e1);
+      border: 2px solid #d94f70;
+      border-radius: 20px;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(217, 79, 112, 0.2);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 12px 30px rgba(217, 79, 112, 0.3);
+    }
+
+    .cherry-blossom {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .petal {
+      position: absolute;
+      font-size: var(--size, 30px);
+      opacity: 0.5;
+      animation: fall var(--duration, 8s) linear forwards, fadeout 8s ease forwards;
+    }
+
+    @keyframes fall {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(var(--x-move, 50vw), 110vh) rotate(720deg); }
+    }
+
+    @keyframes fadeout {
+      0% { opacity: 1; }
+      30% { opacity: 0.9; }
+      70% { opacity: 0.6; }
+      100% { opacity: 0.3; }
+    }
+
+    /* 버튼 (작게) */
+    .contributor-btn {
+      margin-top: 30px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      background-color: #fff0f5;
+      border: 1px solid #d94f70;
+      border-radius: 10px;
+      color: #d94f70;
+      cursor: pointer;
+      transition: 0.3s ease;
+      z-index: 3;
+    }
+
+    .contributor-btn:hover {
+      background-color: #ffe4e1;
+    }
+
+    /* 팝업 스타일 */
+    #contributors {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(to bottom, #fff0f5, #ffe4e1);
+      box-shadow: 0 12px 30px rgba(217, 79, 112, 0.25);
+      border: 2px solid #d94f70;
+      border-radius: 20px;
+      padding: 24px 20px;
+      max-width: 350px;
+      width: 90%;
+      z-index: 10;
+      font-size: 0.8rem;
+      color: #333;
+      text-align: center;
+    }
+
+    #contributors img {
+      width: 80px;
+      margin-bottom: 15px;
+    }
+
+    #contributors .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #d94f70;
+      cursor: pointer;
+    }
+
+    #contributors p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cherry-blossom"></div>
+
+  <div class="button-container">
+    <a href="/lottery" class="btn">🎟️ 내 청춘복권</a>
+    <a href="/ranking" class="btn">🏆 학과별 랭킹</a>
+  </div>
+
+  <!-- 기여자 보기 버튼 -->
+  <button class="contributor-btn" onclick="showContributors()">🙏 기여한 사람들</button>
+
+  <!-- 팝업 -->
+  <div id="contributors">
+    <button class="close-btn" onclick="hideContributors()">×</button>
+    <img src="/static/ynex-로고.png" alt="로고">
+    <p><strong>선문대학교 총학생회(천화)</strong></p>
+    <p><strong>선문대학교 창업동아리(YNEX)</strong></p>
+    <p>사이트개발 / DB운용 / 서버운용</p>
+    <p>컴퓨터공학전공</p>
+    <p>2021243016 김도연</p>
+    <p>2021243053 정승민</p>
+    <p>2021243115 정영진</p>
+    <p>2021243081 전효배</p>
+    <!-- 개인정보 처리방침 버튼 -->
+<button class="contributor-btn" onclick="showPrivacy()">📄 개인정보 처리방침</button>
+
+<!-- 개인정보 처리방침 팝업 -->
+<div id="privacy-popup">
+  <button class="close-btn" onclick="hidePrivacy()">×</button>
+  <h3>개인정보 처리방침</h3>
+  <p><strong>1. 수집 항목</strong><br>이름, 학번, 학과, 접속 IP</p>
+  <p><strong>2. 수집 방법</strong><br>사용자 입력 및 자동 생성 정보</p>
+  <p><strong>3. 이용 목적</strong><br>복권 서비스 제공, 참여 통계, 중복 방지</p>
+  <p><strong>4. 보유 기간</strong><br>행사 종료 후 7일 이내 파기</p>
+  <p><strong>5. 제3자 제공</strong><br>원칙적으로 외부 제공 없음</p>
+  <p><strong>6. 파기 절차</strong><br>전자정보는 복구 불가하게 삭제</p>
+  <p><strong>7. 이용자 권리</strong><br>열람, 정정, 삭제 요청 가능</p>
+  <p><strong>8. 보호책임자</strong><br>Ynex 김도연 대표 / ynex@naver.com</p>
+  <p><strong>9. 기타</strong><br>저장되는 자료는 허용된 IP만 접근 가능한 상태로 저장됩니다.</p>
+  <p><strong>시행일자</strong>: 2025년 5월 19일</p>
+</div>
+
+  </div>
+
+  <script>
+    function createPetal() {
+      const blossomContainer = document.querySelector('.cherry-blossom');
+      const petal = document.createElement('div');
+      petal.classList.add('petal');
+      petal.innerText = '🌸';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.top = Math.random() * 30 + 'vh';
+      petal.style.setProperty('--x-move', (Math.random() * 100 - 50) + 'vw');
+      petal.style.setProperty('--size', (25 + Math.random() * 20) + 'px');
+      petal.style.setProperty('--duration', (6 + Math.random() * 4) + 's');
+      blossomContainer.appendChild(petal);
+      setTimeout(() => petal.remove(), 10000);
+    }
+
+    setInterval(createPetal, 200);
+
+    function showContributors() {
+      document.getElementById("contributors").style.display = "block";
+    }
+
+    function hideContributors() {
+      document.getElementById("contributors").style.display = "none";
+    }
+    function showPrivacy() {
+  document.getElementById("privacy-popup").style.display = "block";
+}
+
+function hidePrivacy() {
+  document.getElementById("privacy-popup").style.display = "none";
+}
+
+  </script>
+</body>
+</html>

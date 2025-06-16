@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>학생 정보 조회</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f5f7fa;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #d94f70;
+      margin-bottom: 30px;
+    }
+
+    .form-box {
+      margin: 0 auto 30px;
+      max-width: 400px;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #d94f70;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #be3a5a;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      margin: 20px auto;
+    }
+
+    table {
+      width: 100%;
+      max-width: 900px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f9dfe6;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 학생/복권 목록 조회</h1>
+
+  <!-- 로그인 섹션 -->
+  <div class="form-box" id="loginBox">
+    <p>비밀번호를 입력하세요</p>
+    <input type="password" id="passwordInput" placeholder="비밀번호 입력" />
+    <div class="error" id="errorMsg"></div>
+    <button onclick="submitPassword()">접속하기</button>
+  </div>
+
+  <!-- 데이터 테이블 -->
+  <div id="protectedContent" class="hidden">
+    <div>
+      <label for="sourceSelect">조회할 데이터베이스:</label>
+      <select id="sourceSelect" onchange="loadData()">
+        <option value="student">학생 DB</option>
+        <option value="lotto">복권 발급 DB</option>
+      </select>
+    </div>
+
+    <table id="dataTable">
+      <thead><tr id="headerRow"></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function submitPassword() {
+      const pw = document.getElementById("passwordInput").value.trim();
+      const res = await fetch("/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw })
+      });
+
+      if (res.ok) {
+        window.location.reload(); // 쿠키 설정 후 다시 로드
+      } else {
+        document.getElementById("errorMsg").textContent = "❌ 비밀번호가 틀렸습니다.";
+      }
+    }
+
+    async function loadData() {
+      const source = document.getElementById("sourceSelect").value;
+      const res = await fetch(`/api/list?source=${source}`);
+      const data = await res.json();
+
+      const headerRow = document.getElementById("headerRow");
+      const tableBody = document.getElementById("tableBody");
+      headerRow.innerHTML = '';
+      tableBody.innerHTML = '';
+
+      if (data.entries.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="99">데이터가 없습니다.</td></tr>';
+        return;
+      }
+
+      const columns = Object.keys(data.entries[0]);
+
+      // 헤더 생성
+      columns.forEach(col => {
+        const th = document.createElement("th");
+        th.textContent = col;
+        headerRow.appendChild(th);
+      });
+
+      // 데이터 행 생성
+      data.entries.forEach(entry => {
+        const tr = document.createElement("tr");
+        columns.forEach(col => {
+          const td = document.createElement("td");
+          td.textContent = entry[col] ?? '';
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // 인증된 사용자라면 데이터 섹션 보여주기
+    window.onload = async () => {
+      const res = await fetch("/auth/check");
+      const result = await res.json();
+      if (result.authenticated) {
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("protectedContent").classList.remove("hidden");
+        loadData();
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>돗자리 정보 등록</title>
+  <style>
+    body {
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      background: #f9f9fa;
+      color: #2e2e2e;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      background-color: white;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #4338ca;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+  <h2>📥 돗자리 정보 등록</h2>
+  <p>돗자리 빌리기는 학생회비 납부자만 가능합니다!</p>
+  <form id="registerForm">
+    <label>학번</label>
+    <input type="text" name="studentId" required>
+
+    <label>이름</label>
+    <input type="text" name="name" required>
+
+    <label>본인 전화번호</label>
+    <input type="tel" name="phone" required>
+
+    <label>본인 계좌번호(보증금 반환용도)</label>
+    <input type="text" name="bank_account" required>
+
+    <label>
+      <input type="checkbox" name="agree_privacy"> 개인정보 수집에 동의합니다
+    </label>
+
+    <label>
+      <input type="checkbox" name="agree_marketing"> 마케팅 수신에 동의합니다(마감시간 임박시 연락용도)
+    </label>
+
+    <button type="submit">등록하기</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById("registerForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const data = {
+        studentId: form.get("studentId"),
+        name: form.get("name"),
+        phone: form.get("phone"),
+        bank_account: form.get("bank_account"),
+        agree_privacy: form.get("agree_privacy") === "on",
+        agree_marketing: form.get("agree_marketing") === "on"
+      };
+      const res = await fetch("/api/extra-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      document.getElementById("result").innerText = result.message || result.detail;
+    };
+  </script>
+</body>
+</html>

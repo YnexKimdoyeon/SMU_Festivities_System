@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>내 청춘복권 번호 조회</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Pretendard', sans-serif;
+      background: linear-gradient(to bottom, #ffe9f3, #ffffff);
+      color: #333;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .cherry-blossom {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .petal {
+      --x-move: 0vw;
+      --size: 24px;
+      --duration: 10s;
+      font-size: var(--size);
+      opacity: 0.8;
+      animation: fall var(--duration) linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) rotate(0deg);
+      }
+      100% {
+        opacity: 0.8;
+        transform: translate(var(--x-move, 50vw), 110vh) rotate(720deg);
+      }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 24px 20px 30px;
+      z-index: 1;
+      position: relative;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .lotto-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0 20px;
+    }
+
+    .ball {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fbc400;
+    }
+
+    .input-wrapper {
+      margin-top: 15px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .btn {
+      margin-top: 12px;
+      padding: 10px 18px;
+      background: #d94f70;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #be3a5a;
+    }
+
+    .info {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #666;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+      margin-top: 20px;
+    }
+
+    .highlight {
+      color: #222;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="cherry-blossom"></div>
+
+  <div class="container">
+    <div class="input-wrapper" id="inputSection">
+      <input type="text" id="studentIdInput" maxlength="10" placeholder="학번 10자리" oninput="validateStudentId(this)">
+      <br>
+      <button class="btn" onclick="fetchMyLotto()">조회하기</button>
+    </div>
+
+    <div id="lottoContent" style="display:none;">
+      <div class="title">청춘복권 (2025.05.22. 추첨)</div>
+      <div class="subtitle">
+        <span class="amount">1등 당첨 80만원 상당 상품</span><br>
+        <span class="amount">2등 당첨 40만원 상당 상품</span><br>
+        <span class="amount">3등 당첨 20만원 상당 상품</span>
+
+      </div>
+
+      <div class="lotto-numbers" id="lottoDisplay"></div>
+      <p id="studentIdDisplay" style="margin:0; font-weight: 500;"></p>
+
+      <div class="info">
+        <div><span class="highlight">추첨일정:</span> 5/22(목) 19:30~19:55</div>
+        <div><span class="highlight"></span> 경품 추첨 시, 현장에 없을 경우 수령불가</div>
+        <div><span class="highlight"></span> 청춘복권 개인 응모권 촬영본 지참 필수</div>
+        <div><span class="highlight"></span> 학생회비 납부자에 한해 참여 가능</div>
+      </div>
+    </div>
+  </div>
+
+ <script>
+  function validateStudentId(input) {
+    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+  }
+
+  async function fetchMyLotto() {
+    const id = document.getElementById("studentIdInput").value.trim();
+    if (id.length !== 10) {
+      alert("학번은 숫자 10자리여야 합니다.");
+      return;
+    }
+
+    const res = await fetch(`/api/my-lotto?studentId=${id}`);
+    const data = await res.json();
+    if (!data.entries || data.entries.length === 0) {
+      alert("해당 학번으로 발급된 청춘복권이 없습니다.");
+      return;
+    }
+
+    document.getElementById("inputSection").style.display = "none";
+    document.getElementById("lottoContent").style.display = "block";
+    document.getElementById("studentIdDisplay").textContent = id;
+
+    const display = document.getElementById("lottoDisplay");
+    display.innerHTML = "";
+
+    data.entries.forEach((entry, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.style.marginBottom = '12px';
+      wrapper.style.display = 'flex';
+      wrapper.style.flexWrap = 'wrap';
+      wrapper.style.justifyContent = 'center';
+      wrapper.style.gap = '10px';
+
+      const numbers = entry.numbers.split(' ');
+      numbers.forEach(num => {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        ball.textContent = num;
+        wrapper.appendChild(ball);
+      });
+
+      const label = document.createElement('div');
+      label.style.fontSize = '0.85rem';
+      label.style.color = '#888';
+      label.style.marginBottom = '4px';
+
+      display.appendChild(label);
+      display.appendChild(wrapper);
+    });
+  }
+
+  function createPetal() {
+    const blossomContainer = document.querySelector(".cherry-blossom");
+    const petal = document.createElement("div");
+    petal.classList.add("petal");
+    petal.innerText = "🌸";
+    petal.style.left = Math.random() * 100 + "vw";
+    petal.style.top = Math.random() * 30 + "vh";
+    petal.style.setProperty("--x-move", Math.random() * 100 - 50 + "vw");
+    petal.style.setProperty("--size", 20 + Math.random() * 10 + "px");
+    petal.style.setProperty("--duration", 6 + Math.random() * 4 + "s");
+    blossomContainer.appendChild(petal);
+    setTimeout(() => petal.remove(), 10000);
+  }
+
+  setInterval(createPetal, 300);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+delete from students where 1=1
+delete from lottolist where 1=1
+
+
+UPDATE lotto_entries
+SET name = '김도연'
+WHERE lotto_entries.studentId = 2022772003;

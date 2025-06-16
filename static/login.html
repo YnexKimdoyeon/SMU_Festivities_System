@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>학생 목록 보호</title>
+  <style>
+    body { font-family: Pretendard, sans-serif; text-align: center; padding: 100px; background: #f7f7f7; }
+    input { padding: 10px; width: 240px; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; }
+    button { padding: 10px 20px; font-size: 1rem; background: #d94f70; color: white; border: none; border-radius: 6px; margin-left: 10px; cursor: pointer; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🔐 보호된 페이지</h1>
+  <p>비밀번호를 입력하세요</p>
+  <input type="password" id="pw" placeholder="비밀번호" />
+  <button onclick="submit()">확인</button>
+  <div class="error" id="err"></div>
+
+  <script>
+    async function submit() {
+      const pw = document.getElementById('pw').value;
+      const res = await fetch('/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+
+      if (res.ok) {
+        window.location.href = '/student-list';
+      } else {
+        document.getElementById('err').textContent = '비밀번호가 틀렸습니다.';
+      }
+    }
+  </script>
+</body>
+</html>
